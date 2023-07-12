@@ -1,8 +1,8 @@
 // Created with rafce | ES7 React/Redux... extension
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Error from './Error';
 
-const Formulario = ({ pacientes, setPacientes }) => {
+const Formulario = ({ pacientes, setPacientes, paciente }) => {
 
   const [nombre, setNombre] = useState('');
   const [propietario, setPropietario] = useState('');
@@ -11,6 +11,16 @@ const Formulario = ({ pacientes, setPacientes }) => {
   const [sintomas, setSintomas] = useState('');
 
   const [error, setError] = useState(false)
+
+  useEffect(() => {
+    if (Object.keys(paciente).length > 0) {
+      setNombre(paciente.nombre)
+      setPropietario(paciente.propietario)
+      setEmail(paciente.email)
+      setFecha(paciente.fecha)
+      setSintomas(paciente.sintomas)
+    }
+  }, [paciente])
 
   const generarId = () => {
     const random = Math.random().toString(36).substring(2)
@@ -34,12 +44,23 @@ const Formulario = ({ pacientes, setPacientes }) => {
       propietario,
       email,
       fecha,
-      sintomas,
-      id: generarId()
+      sintomas
     }
 
+    if (paciente.id) {
+      // Editando
+      pacienteNuevo.id = paciente.id
+      const pacientesActualizados = pacientes.map(
+        pacienteState => pacienteState.id === paciente.id ? pacienteNuevo : pacienteState)
 
-    setPacientes([...pacientes, pacienteNuevo])
+      setPacientes(pacientesActualizados)
+
+    } else {
+      // Creando
+      pacienteNuevo.id = generarId()
+      setPacientes([...pacientes, pacienteNuevo])
+    }
+
     setNombre('')
     setPropietario('')
     setEmail('')
@@ -123,7 +144,7 @@ const Formulario = ({ pacientes, setPacientes }) => {
 
         <input
           type="submit"
-          value="Agregar paciente"
+          value={paciente.id ? 'Editar paciente' : 'Agregar paciente'}
           className="bg-indigo-600 w-full p-3 text-white uppercase font-bold 
           hover:bg-indigo-700 cursor-pointer transition-all rounded-md"
         />
